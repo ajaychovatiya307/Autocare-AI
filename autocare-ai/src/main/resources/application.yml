@@ -1,0 +1,77 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: autocare-ai
+
+  datasource:
+    url: jdbc:mariadb://localhost:3306/autocare_ai
+    username: autocare
+    password: ${DB_PASSWORD:Autocare@123}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
+
+  ai:
+    azure:
+      openai:
+        endpoint: ${AZURE_OPENAI_ENDPOINT}
+        api-key: ${AZURE_OPENAI_KEY}
+        chat:
+          options:
+            deployment-name: gpt-5-1
+        embedding:
+          options:
+            deployment-name: text-embedding-ada-002
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+logging:
+  level:
+    root: INFO
+    com.autocare.ai: INFO
+    org.springframework.ai: INFO
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: DEBUG
+
+# AutoCare AI domain properties bound by com.autocare.ai.config.AutoCareProperties (architecture.md §12, SRS §4.1/§4.7)
+autocare:
+  rag:
+    similarity-threshold: 0.50
+    allow-empty-context: false
+    retrieval-language: en
+  embedding:
+    # Must match the MariaDB vector column dimension (NFR-008); 1536 = Azure OpenAI text-embedding-3-small/ada-002
+    dimension: 1536
+  vector-store:
+    initialize-schema: true
+    # Spring AI 1.0.0 validates before initializing a missing vector table.
+    schema-validation: false
+  chat:
+    query-transform-deployment: gpt-5-1
+    answer-deployment: gpt-5-1
+    memory-max-messages: 20
+  kb:
+    default-version: v1.0
+  rate-limit:
+    chat-requests-per-minute: 10
+    kb-requests-per-minute: 10
+    window-seconds: 60
+
+# Manual Swagger UI / Postman test accounts (one per role); override before any shared deployment.
+# autocare:
+#   security:
+#     test-users:
+#       owner-password: ${OWNER_PASSWORD:}
+#       advisor-password: ${ADVISOR_PASSWORD:}
+#       admin-password: ${ADMIN_PASSWORD:}
+# CREATE DATABASE autocare_ai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+# CREATE USER 'autocare'@'localhost' IDENTIFIED BY 'Autocare@123';
+# GRANT ALL PRIVILEGES ON autocare_ai.* TO 'autocare'@'localhost';
+# FLUSH PRIVILEGES;
+# EXIT;

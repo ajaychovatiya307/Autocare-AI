@@ -1,0 +1,58 @@
+# Test classpath resources take precedence over src/main/resources/application.yml for @SpringBootTest runs.
+server:
+  port: 0
+
+spring:
+  application:
+    name: autocare-ai
+
+  flyway:
+    enabled: false
+
+  sql:
+    init:
+      mode: always
+
+  datasource:
+    url: jdbc:h2:mem:autocare_ai_test;DB_CLOSE_DELAY=-1;MODE=MariaDB
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+  ai:
+    azure:
+      openai:
+        api-key: test-key
+        endpoint: https://test.openai.azure.com/
+        embedding:
+          options:
+            deployment-name: test-embedding
+
+autocare:
+  rag:
+    similarity-threshold: 0.50
+    allow-empty-context: false
+  chat:
+    query-transform-deployment: test-query-transform
+    answer-deployment: test-answer
+    memory-max-messages: 20
+  rate-limit:
+    chat-requests-per-minute: 10
+    kb-requests-per-minute: 10
+    window-seconds: 60
+  embedding:
+    dimension: 1536
+  vector-store:
+    initialize-schema: false
+    schema-validation: false
+
+logging:
+  level:
+    root: WARN
+    com.autocare.ai: INFO
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: OFF

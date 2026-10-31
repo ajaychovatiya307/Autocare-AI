@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
+<meta name="autocare-api-base" content="http://localhost:8080" />
+<title>AutoCare AI — Service Assistant</title>
+<script>
+  (() => {
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem("autocare.ui.theme");
+    } catch (error) {
+      storedTheme = null;
+    }
+    window.autocareThemeStored = storedTheme === "light" || storedTheme === "dark";
+    const theme = window.autocareThemeStored
+      ? storedTheme
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside id="appSidebar" class="sidebar" aria-label="Assistant settings">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 17h14M6.5 17l-1.2-4.6a2 2 0 0 1 .1-1.3l1.6-3.5A2 2 0 0 1 8.8 6.4h6.4a2 2 0 0 1 1.8 1.2l1.6 3.5a2 2 0 0 1 .1 1.3L17.5 17" />
+            <circle cx="8" cy="17.5" r="1.6" />
+            <circle cx="16" cy="17.5" r="1.6" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <strong>AutoCare AI</strong>
+          <span>Service Assistant</span>
+        </div>
+        <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to dark theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 15.2A8.5 8.5 0 0 1 8.8 3.8 8.5 8.5 0 1 0 20.2 15.2Z" /></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" /></svg>
+        </button>
+      </div>
+
+      <div class="sidebar-body">
+        <section class="side-section prefs-section" aria-labelledby="prefsToggle">
+          <h2 class="side-heading">
+            <button id="prefsToggle" class="section-toggle" type="button" aria-expanded="true" aria-controls="prefsBody">
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              <span>Preferences</span>
+            </button>
+          </h2>
+          <div id="prefsBody" class="side-section-body">
+            <div class="field">
+              <label for="vehicleFamily">Vehicle family</label>
+              <div class="select-wrap">
+                <select id="vehicleFamily">
+                  <option value="">General (all families)</option>
+                  <option value="AC-HB-P">Hatchback (AC-HB-P)</option>
+                  <option value="AC-SD-P">Sedan (AC-SD-P)</option>
+                  <option value="AC-SV-P">SUV Petrol (AC-SV-P)</option>
+                  <option value="AC-SV-D">SUV Diesel (AC-SV-D)</option>
+                  <option value="AC-EV-1">Electric (AC-EV-1)</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="language">Language</label>
+              <div class="select-wrap">
+                <select id="language">
+                  <option value="en" selected>English</option>
+                  <option value="hi">Hindi</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="side-section chats-section" aria-labelledby="chatsToggle">
+          <div class="chats-heading-row">
+            <h2 class="side-heading">
+              <button id="chatsToggle" class="section-toggle" type="button" aria-expanded="true" aria-controls="chatsBody">
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                <span>Chats</span>
+              </button>
+            </h2>
+            <button id="newChat" class="btn new-chat-btn" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              New chat
+            </button>
+          </div>
+          <div id="chatsBody" class="side-section-body chats-body">
+            <nav id="chatHistory" aria-label="Chat history"></nav>
+          </div>
+        </section>
+      </div>
+      <div id="sidebarResizer" class="resizer" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" aria-controls="appSidebar" aria-valuemin="220" aria-valuemax="420" aria-valuenow="280" tabindex="0"></div>
+    </aside>
+
+    <main class="chat">
+      <header class="chat-header">
+        <div class="chat-title">
+          <h1>Ask AutoCare AI</h1>
+          <p>Grounded answers on maintenance, warranty, bookings and repair status.</p>
+        </div>
+        <div class="header-actions">
+          <button id="adminLink" class="btn" type="button" hidden aria-controls="monitoringPanel" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4" /></svg>
+            Monitoring
+          </button>
+          <span class="header-divider" aria-hidden="true"></span>
+          <label class="toggle" title="Async streams the answer as server-sent events">
+            <input id="asyncMode" type="checkbox" aria-label="Use asynchronous streaming" />
+            <span class="toggle-label toggle-sync">Sync</span>
+            <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+            <span class="toggle-label toggle-async">Async</span>
+          </label>
+          <span class="header-divider" aria-hidden="true"></span>
+          <div class="account">
+            <button id="loginButton" class="btn btn-primary" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3" /><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg>
+              Sign in
+            </button>
+            <button id="accountButton" class="btn account-button" type="button" hidden aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu">
+              <span class="account-avatar" aria-hidden="true"></span>
+              <span class="account-username"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+            </button>
+            <div id="accountMenu" class="popover" hidden>
+              <div class="account-summary">
+                <span class="account-summary-label">Signed in as</span>
+                <span id="accountName"></span>
+                <span id="accountRole" class="role-badge"></span>
+              </div>
+              <div class="account-divider"></div>
+              <button id="signOut" class="sign-out-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3" /><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg>
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section id="messages" class="messages" aria-live="polite" aria-label="Conversation">
+        <div class="welcome" id="welcome">
+          <div class="welcome-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.6-.6-.6-2.6z" />
+            </svg>
+          </div>
+          <h2>How can I help with your vehicle today?</h2>
+          <p>Sign in, then pick a starter below or type your own question.</p>
+          <div class="suggestions">
+            <button class="chip" type="button">When is Standard Service A due?</button>
+            <button class="chip" type="button">What is excluded from warranty coverage?</button>
+            <button class="chip" type="button">My brake pedal feels soft and braking is reduced</button>
+            <button class="chip" type="button">What are the repair status codes?</button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="composer-wrap">
+        <form id="composer" class="composer" autocomplete="off">
+          <label for="input" class="visually-hidden">Message</label>
+          <textarea id="input" rows="1" placeholder="Sign in to ask a question…" maxlength="2000"></textarea>
+          <button id="send" class="send-btn" type="submit" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12h14M13 6.5 18.5 12 13 17.5" /></svg>
+          </button>
+        </form>
+        <p class="hint"><kbd>Enter</kbd> to send <span aria-hidden="true">·</span> <kbd>Shift</kbd> + <kbd>Enter</kbd> for a new line <span aria-hidden="true">·</span> Max 2,000 characters</p>
+      </footer>
+    </main>
+
+    <aside id="monitoringPanel" class="monitoring-panel" aria-label="Monitoring log" hidden>
+      <header class="monitoring-header">
+        <div>
+          <h2>Monitoring</h2>
+          <p>All turn summaries · Most recent first</p>
+        </div>
+        <button id="closeMonitoring" class="monitoring-close" type="button" aria-label="Close monitoring panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
+      </header>
+      <div class="monitoring-layout">
+        <div class="monitoring-col monitoring-col-history">
+          <h3 class="monitoring-col-title">Turns</h3>
+          <nav id="monitoringHistory" class="monitoring-history" aria-label="Session turn history">
+            <p class="monitoring-empty">No turns recorded in this session.</p>
+          </nav>
+        </div>
+        <div class="monitoring-col monitoring-col-details">
+          <h3 class="monitoring-col-title">Turn trace</h3>
+          <section id="monitoringDetails" class="monitoring-details" aria-live="polite">
+            <p class="monitoring-empty">Send a message to view its monitoring details.</p>
+          </section>
+        </div>
+      </div>
+      <p class="monitoring-legend"><strong>Diagnostic (framework):</strong> SimpleLoggerAdvisor logs diagnostics; it is not the audit store.
+        <strong>Custom (business control):</strong> ConversationAuditAdvisor persists redacted audit records.
+        RAG components are reported as retrieval pipeline summaries.</p>
+    </aside>
+  </div>
+
+  <dialog id="loginDialog" class="dialog" aria-labelledby="loginTitle">
+    <header class="dialog-header">
+      <h2 id="loginTitle">Sign in</h2>
+      <p>Use your AutoCare account to start chatting.</p>
+    </header>
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required />
+      </div>
+      <p class="login-help">Demo accounts: owner, advisor, admin.</p>
+      <p id="loginError" class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button id="loginCancel" class="btn" type="button">Cancel</button>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+      </div>
+    </form>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>

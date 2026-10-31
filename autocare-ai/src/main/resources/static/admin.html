@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoCare AI — Knowledge Base Management</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { display: block; min-height: 100vh; padding: 2rem; }
+    main { max-width: 1100px; margin: 0 auto; }
+    .admin-header, .admin-section { margin-bottom: 1.5rem; }
+    .admin-section { padding: 1.25rem; border: 1px solid #dfe3e8; border-radius: 12px; background: #fff; }
+    .admin-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .admin-form label { display: grid; gap: .35rem; font-weight: 600; }
+    .admin-form input, .admin-form select, .admin-form textarea { width: 100%; padding: .65rem; border: 1px solid #cbd2d9; border-radius: 6px; font: inherit; }
+    .admin-form .wide { grid-column: 1 / -1; }
+    .admin-actions, .version-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+    .admin-actions button, .version-actions button { padding: .6rem .9rem; border: 0; border-radius: 6px; cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th, .admin-table td { padding: .7rem; border-bottom: 1px solid #e4e7eb; text-align: left; vertical-align: top; }
+    .message { margin: .75rem 0; padding: .75rem; border-radius: 6px; white-space: pre-wrap; }
+    .message.error { color: #8a1c1c; background: #fdecec; }
+    .message.success { color: #155e35; background: #e8f7ed; }
+    .back-link { display: inline-block; margin-bottom: 1rem; }
+    @media (max-width: 650px) { body { padding: 1rem; } .admin-table { font-size: .85rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back-link" href="/">← Back to AutoCare AI</a>
+    <header class="admin-header">
+      <h1>Knowledge Base Management</h1>
+      <p>Ingest candidate versions, validate against the KB-METADATA sample questions, then activate.</p>
+    </header>
+
+    <section class="admin-section" aria-labelledby="credentials-heading">
+      <h2 id="credentials-heading">Administrator sign-in</h2>
+      <label for="adminPassword">Admin password</label>
+      <input id="adminPassword" type="password" value="admin-pass" autocomplete="current-password" />
+    </section>
+
+    <section class="admin-section" aria-labelledby="ingest-heading">
+      <h2 id="ingest-heading">Ingest a candidate version</h2>
+      <form id="ingestForm" class="admin-form">
+        <label>Document code<input name="docCode" required maxlength="32" placeholder="KB-AUTO-001" /></label>
+        <label>Version<input name="version" required maxlength="16" placeholder="v1.1" /></label>
+        <label>Effective date<input name="effectiveDate" type="date" required value="2026-10-01" /></label>
+        <label>Status<select name="status" required><option value="RETIRED" selected>RETIRED (awaiting validation)</option></select></label>
+        <label>Audience<input name="audience" required placeholder="OWNER|ADVISOR" /></label>
+        <label>Vehicle family<input name="vehicleFamily" placeholder="all or AC-SD-P" /></label>
+        <label>Section<input name="section" required placeholder="2" /></label>
+        <label>Document type<input name="docType" required placeholder="vehicle_reference" /></label>
+        <input name="requesterRole" type="hidden" value="ADMIN" />
+        <label class="wide">Document content<textarea name="content" required rows="8"></textarea></label>
+        <div class="admin-actions wide"><button type="submit">Ingest candidate</button></div>
+      </form>
+    </section>
+
+    <section class="admin-section" aria-labelledby="versions-heading">
+      <div class="admin-actions">
+        <h2 id="versions-heading">Documents and versions</h2>
+        <button id="refreshButton" type="button">Refresh list</button>
+      </div>
+      <div id="versionsMessage" role="status" aria-live="polite"></div>
+      <div style="overflow-x:auto">
+        <table class="admin-table">
+          <thead><tr><th>Document</th><th>Version</th><th>Status</th><th>Effective</th><th>Chunks</th><th>Audience / family</th><th>Actions</th></tr></thead>
+          <tbody id="versions"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Build output
+target/
+
+# Office lock/temp files (e.g. ~$-AUTO-001...docx)
+~$*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+application-local.yml
