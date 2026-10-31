@@ -1,14 +1,5 @@
 # AutoCare AI
 
-AutoCare AI is an AI-powered assistant that answers vehicle owners' and service advisors' questions about vehicle service, maintenance and warranty.
+AutoCare AI is an AI-powered assistant that helps vehicle owners and service advisors get quick, reliable answers to questions about vehicle service, maintenance and warranty. Users can ask things like when the next service is due, what the warranty covers, how to book a workshop visit, what to do about a warning symptom, or what the status of a repair is.
 
-## What It Does
-
-- Answers questions about service schedules, preventive maintenance, warranty coverage, workshop bookings, vehicle symptoms, repair status and roadside assistance.
-- Generates every answer from an approved Knowledge Base and cites the source documents it used.
-- Escalates to an authorized service advisor instead of guessing when the Knowledge Base has no relevant information.
-- Shows each user only the information intended for their role: vehicle owner, service advisor or admin.
-- Gives safe next-step guidance, such as stopping the vehicle and seeking assistance, for safety-critical symptoms like brake failure, smoke or overheating.
-- Hides personal details such as VIN, registration number, phone number, email and address before processing or storing any conversation.
-- Keeps an audit trail of every conversation for traceability.
-- Lets admins add, validate, activate and roll back Knowledge Base documents so that answers always come from current, approved content.
+Every answer comes from an approved company Knowledge Base, never from guesswork, and shows the documents it was taken from. If the Knowledge Base has no answer, the assistant tells the user to contact an authorized service advisor. The assistant also keeps customers' personal details private and shows each user only the information meant for their role.
